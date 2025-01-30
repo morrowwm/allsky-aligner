@@ -64,9 +64,10 @@
 							console.log("y translate");
 						}
 						if(navElement === "loadimage"){
-							//var filename = .navigate.;
+							var imageSrc = $( "#form-imgfilename" ).val();
 							
-							$("#working-image").attr("src", '/images/test.jpg')
+							console.log("Attempting load of: " + imageSrc);
+							$("#working-image").attr("src", imageSrc)
 								.attr("height", 760)
 								.attr("width", 1014);
 						}
@@ -75,8 +76,9 @@
 					planetarium = S.virtualsky({
 						id: 'starmap',	// This should match the ID used in the DOM
 						transparent: true,
-						color:'rgb(0,255,255)',
+						color:'rgb(0,120,120)',
 						scalestars: 5,
+						projection: 'allsky_aligner',
 						showstarlabels: true,
 						constellations: true,
 						latitude: 44.803842, 
@@ -90,7 +92,7 @@
 			</script>
 			
 			<div id="imageContainer" class="image" style="max-width: 2000px">
-				<div id="live_container" class="live" style="z-index:1">
+				<div id="live_container" class="live">
 					<img title="allsky image" alt="allsky image" id="working-image" class="working-image" src="#"  alt="image" style="margin-right: -100%">
 				</div>
 				<div id="starmap_container" class="starmap">
