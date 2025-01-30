@@ -1,5 +1,5 @@
 # allsky-aligner
-tool to align constellation overlay
+tool to align constellation overlay in https://github.com/AllskyTeam/allsky
 
 Very alpha. If you'd like to help:
 1) copy aligner.php into ~/allsky/html/allsky/
