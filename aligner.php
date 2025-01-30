@@ -23,7 +23,7 @@
 				border: 1px solid #000000;
 				z-index:5
 			}
-			#form-file_chooser {
+			.navigate {
 				position:absolute; 
 				left: 0;
 				display:inline-block;
@@ -34,34 +34,42 @@
 	<body>  
 		<script src="virtualsky/stuquery.js"></script>
 		<script src="virtualsky/virtualsky.js"></script>
-		<div class="container" style="width:1000px;">  
-			<h3>Constellation Aligner</h3>   
-			<form id="form-file_chooser" class="form-file_chooser" action="" method="post" autocomplete="off">
-				<label for="form-imgfile">images/20250124/image-20250125021912.jpg</label>
-				<input type="text" id="form-imgfilename" name="form-imgfile" required autofocus value="mages/20250124/image-20250125021912.jpg" size="48">
-				<button type="submit" class="cw" role="button">CW</button>
-				<button type="submit" class="ccw" role="button">CCW</button>
-				<button type="submit" class="up" role="button">U</button>
-				<button type="submit" class="down" role="button">D</button>
-				<button type="submit" class="left" role="button">L</button>
-				<button type="submit" class="right" role="button">R</button>
-			</form>
+		<div class="container" id="working-area" style="width:1000px;"> 
+				<h3>Constellation Aligner</h3>  
+			<div class="navigate">
+				<form id="form-file_chooser" class="form-file_chooser" action="" method="post" autocomplete="off">
+					<label for="form-imgfile">Image </label>
+					<input type="text" id="form-imgfilename" name="form-imgfile" required autofocus value="mages/20250124/image-20250125021912.jpg" size="48">
+					<input type="submit" id="loadimage" value="Load">
+				</form>
+			
+				<button type="button" id="cw" value = "CW">CW</button>
+				<button type="button" id="ccw" value = "CCW">CCW</button>
+				<button type="button" id="up" value = "U">U</button>
+				<button type="button" id="down" value = "D">D</button>
+				<button type="button" id="left" value = "L">L</button>
+				<button type="button" id="right" value = "R">R</button>
+			</div>
 			<script  type="text/javascript">
 				$(document).ready(function () {
 					var planetarium;
-					const imageInput = $("form-imgfilename");
+					var imagefilename;
 					
-					$('#form-file_chooser').submit(function (event) {
+					$(".navigate").on( "click", function (event) {
 						event.preventDefault(); // Prevent default form submission
-						var data = $("#form-file_chooser :input").serializeArray();
-						console.log(data); //use the console for debugging, F12 in Chrome, not alerts
-					});
-					
-					$('#form-imgfilename').change(function (e) {
-						console.log("input changed " + e.target)
-						$("#working-image").attr("src", '/images/20250124/image-20250125021912.jpg')
-							.attr("height", 760)
-							.attr("width", 1014);
+						event.stopPropagation();
+						var navElement = event.target.id;
+						console.log("input clicked", navElement, " value: ", navElement);
+						if(navElement === "up"){
+							console.log("y translate");
+						}
+						if(navElement === "loadimage"){
+							//var filename = .navigate.;
+							
+							$("#working-image").attr("src", '/images/test.jpg')
+								.attr("height", 760)
+								.attr("width", 1014);
+						}
 					});
 					
 					planetarium = S.virtualsky({
@@ -73,7 +81,7 @@
 						constellations: true,
 						latitude: 44.803842, 
 						longitude: -63.62060,
-						clock: new Date("March 05, 2024 03:31:02")
+						clock: new Date("January 05, 2025 02:19:12")
 					});
 					$("#starmap")
 					.css("margin-top", -1000 + "px")
