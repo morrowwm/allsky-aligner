@@ -23,3 +23,4 @@ Next steps:
 * pull request on changes needed in all-sky for use in html/allsky/virtualsky/virtualsky.js
 * * see https://github.com/AllskyTeam/allsky/discussions/3462#discussioncomment-8753359
   *  scaling, rotation, xoffset, yoffset
+* pull it into allsky baseline? 
