@@ -29,6 +29,12 @@
 	<body>  
 		<script src="virtualsky/stuquery.js"></script>
 		<script src="virtualsky/virtualsky.js"></script>
+		<script  type="text/javascript">
+			let virtualSkyData = null; 
+			let planetarium = null;
+			var [az, el, w, h] = [0.0, 0.0, 0.0, 0.0];
+		</script>
+		
 		<div class="container" id="working-area" style="width:1000px;"> 
 			<div class="navigate">
 				<form id="form-file_chooser" class="form-file_chooser" action="" method="post" autocomplete="off">
@@ -46,11 +52,8 @@
 				</form>
 
 			</div>
-			<script  type="text/javascript">
-				var virtualSkyData = null;
-				
+			<script  type="text/javascript">				
 				$(document).ready(function () {
-					var planetarium;
 					var imagefilename;
 					var configData = "configuration.json"
 					
@@ -91,7 +94,8 @@
 							virtualSkyData.clock = new Date("January 05, 2025 02:19:12")
 
 							planetarium = S.virtualsky(virtualSkyData);
-							console.log("Success reading " + configData);
+							[az, el, w, h] = planetarium.getOrientation();
+							console.log("Success reading " + configData + " for example az: " + virtualSkyData.az);
 						}
 					});
 					
@@ -108,16 +112,18 @@
 						else if(navElement === "left") {}
 						else if(navElement === "right") {}
 						else if(navElement === "cw") {
-							virtualSkyData.az = virtualSkyData.az + 0.1;
+							az = az + 0.1; // to do
 						}
 						else if(navElement === "ccw") {
-							virtualSkyData.az = virtualSkyData.az - 0.1;
+							az = az - 0.1;
 						}
 						else if(navElement === "bigger") {
-							virtualSkyData.width = virtualSkyData.width + 50;
+							w = w + 50;
+							virtualSkyData.wide = virtualSkyData.wide + 50;
 						}
 						else if(navElement === "smaller") {
-							virtualSkyData.width = virtualSkyData.width - 50;
+							w = w - 50;
+							virtualSkyData.wide = virtualSkyData.wide - 50;
 						}
 						
 						else if(navElement === "loadimage") {
@@ -130,8 +136,8 @@
 								.attr("width", 1014);
 							
 						}
-
-						planetarium = S.virtualsky({virtualSkyData});
+						console.log("Updating sky because of " + navElement);
+						planetarium.updateOrientation(az,el,w,h);
 					});
 				});
 			</script>
