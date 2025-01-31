@@ -9,6 +9,7 @@ Very alpha. If you'd like to help:
 5) your image should appear
 
 6) open the developer console, click on the navigation buttons, you should see messages
+7) constellations should rotate now
 
 I could use a quick browse through aligner.php by an experienced allsky developer for feedback on any real issues. So far it isn't really PHP code at all. I think it will have to have some PHP to write out the alignment parameters
 
@@ -16,7 +17,7 @@ Next steps:
 * make the latitude and longitude configurable
 * add a real file selector
 * get the time from the image, for use in planetarium object
-* **Next**: get the constellation adjusting buttons working. This will take some changes to virtual sky, I think?
+* **Working on**: get the constellation adjusting buttons working. This will take some changes to virtual sky, I think?
 * make the whole thing prettier
 * get image and constellation scaling figured out
 * present results in a form usable by allsky
