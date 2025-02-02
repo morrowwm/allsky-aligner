@@ -16,10 +16,10 @@ I could use a quick browse through aligner.php by an experienced allsky develope
 Next steps:
 * make the latitude and longitude configurable
 * add a real file selector
-* get the time from the image, for use in planetarium object
+* **Next** the time from the image, for use in planetarium object
 * **Working on**: get the constellation adjusting buttons working. This will take some changes to virtual sky, I think?
 * make the whole thing prettier
-* get image and constellation scaling figured out
+* get image and constellation scaling figured out ** Working for fisheye/polar **
 * present results in a form usable by allsky
 * pull request on changes needed in all-sky for use in html/allsky/virtualsky/virtualsky.js
 * * see https://github.com/AllskyTeam/allsky/discussions/3462#discussioncomment-8753359
