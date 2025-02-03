@@ -8,7 +8,7 @@
 
 	OPTIONS (default values in brackets):
 		id ('starmap') - The ID for the HTML element where you want the sky inserted
-		projection ('polar') - The projection type as 'polar', 'stereo', 'lambert', 'equirectangular', or 'ortho' or 'allsky_aligner' ALLSKY
+		projection ('polar') - The projection type as 'polar', 'stereo', 'lambert', 'equirectangular', or 'ortho'
 		width (500) - Set the width of the sky unless you've set the width of the element
 		height (250) - Set the height of the sky unless you've set the height of the element
 		planets - either an object containing an array of planets or a JSON file
@@ -2759,7 +2759,9 @@ VirtualSky.prototype.drawStars = function(){
 				var y = this.yoffset+p.y;
 				c.moveTo(x+d,y);
 				if(this.showstars) c.arc(x,y,d,0,Math.PI*2,true);
-				if(this.showstarlabels && this.starnames[this.stars[i][0]]) this.drawLabel(x,y,d,"",this.htmlDecode(this.starnames[this.stars[i][0]]));
+				if(this.showstarlabels && this.starnames[this.stars[i][0]]){
+					this.drawLabel(x,y,d,"",this.htmlDecode(this.starnames[this.stars[i][0]]));
+				}
 			}
 		}
 	}
@@ -2934,7 +2936,7 @@ VirtualSky.prototype.drawLabel = function(x,y,d,colour,label){
 	var xoff = d;
 	if((this.polartype) && c.measureText) xoff = -c.measureText(label).width-3;
 	if((this.polartype) && x < this.wide/2) xoff = d;
-	c.fillText(label,this.xoffset+x+xoff,this.yoffset+y-(d+2));
+	c.fillText(label,x+xoff,y-(d+2));
 	return this;
 };
 VirtualSky.prototype.drawConstellationLines = function(colour){
