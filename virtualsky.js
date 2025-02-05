@@ -54,6 +54,7 @@
 		fontfamily - set the font family using a CSS style font-family string otherwise it inherits from the container element
 		objects - a semi-colon-separated string of recognized object names to display e.g. "M1;M42;Horsehead Nebula" (requires internet connection)
 */
+			
 (function (S) {
 
 /*@cc_on
@@ -64,6 +65,9 @@
 	window.setInterval =f(window.setInterval);
 })(function(f){return function(c,t){var a=[].slice.call(arguments,2);return f(function(){c.apply(this,a)},t)}});
 @*/
+
+
+
 // Define a shortcut for checking variable types
 function is(a,b){return typeof a===b;}
 function isEventSupported(eventName) {
@@ -223,6 +227,7 @@ window.fullScreenApi = fullScreenApi;
 
 /*! VirtualSky */
 var interval = undefined;	// ALLSKY ADDED: "interval" needs to be global
+
 function VirtualSky(input){
 
 	this.version = "0.7.7";
@@ -306,11 +311,14 @@ function VirtualSky(input){
 	this.ra_off = 0;
 	this.dc_off = 0;
 	// WMM adjust projection
-	this.theta = 0;
-	this.phi = 0;
-	this.scale_factor = 1.0;
-	this.xoffset = 0;
-	this.yoffset = 0;
+	this.aligner = {};
+	this.aligner.theta = 0.0;
+	this.aligner.phi = 0.0; //TODO this is unused?
+	this.aligner.scale_factor=1.0;
+	this.aligner.xoffset = 0.0; 
+	this.aligner.yoffset = 0.0; 
+	this.aligner.xorigin = 0.0; 
+	this.aligner.yorigin = 0.0;
 	
 	this.fov = 30;
 	this.plugins = [];
@@ -350,8 +358,8 @@ function VirtualSky(input){
 			title: 'Fisheye polar projection',
 			azel2xy: function(az,el,w,h){
 				var radius = h/2;
-				var rotation = theta * this.d2r;
-				var r = scale_factor * radius*Math.sin(((Math.PI/2)-el)/2)/0.70710678;	// the field of view is bigger than 180 degrees
+				var rotation = this.aligner.theta * this.d2r;
+				var r = this.aligner.scale_factor * radius*Math.sin(((Math.PI/2)-el)/2)/0.70710678;	// the field of view is bigger than 180 degrees
 				return {x:(w/2-r*Math.sin(az+rotation)),y:(radius-r*Math.cos(az+rotation)),el:el};
 			},
 			xy2azel: function(x, y, w, h) {
@@ -1447,7 +1455,6 @@ VirtualSky.prototype.createSky = function(){
 	if(this.c && this.c.getContext){
 		this.setWH(this.wide,this.tall);
 		var ctx = this.ctx = this.c.getContext('2d');
-				
 		ctx.clearRect(0,0,this.wide,this.tall);
 		ctx.beginPath();
 		var fs = this.fontsize();
@@ -1455,6 +1462,7 @@ VirtualSky.prototype.createSky = function(){
 		ctx.fillStyle = 'rgb(0,0,0)';
 		ctx.lineWidth = 1.5;
 		var loading = 'Loading sky...';
+		// https://github.com/AllskyTeam/allsky/issues/4287
 		ctx.fillText(loading,(this.wide - ctx.measureText(loading).width)/2,(this.tall-fs)/2);
 		ctx.fill();
 
@@ -1622,7 +1630,7 @@ VirtualSky.prototype.createSky = function(){
 			var y = e.originalEvent.touches[0].pageY;
 			e.data.sky.debug('touchmove '+x+','+y+' '+s.x+','+s.y+'');
 			var theta,f,dr;
-			if(s.dragging){
+			if(s.mouse && s.dragging){		// ALLSKY fix: added "s.mouse &&"
 				if(s.polartype){
 					theta = Math.atan2(y-s.tall/2,x-s.wide/2);
 					if(!s.theta) s.theta = theta;
@@ -2391,7 +2399,7 @@ VirtualSky.prototype.invokeDrawCb = function(visible){
 
 // ALLSKY ADDED "whofrom" argument to aid debugging.  It says who called drawImmediate().
 VirtualSky.prototype.drawImmediate = function(proj, whofrom){
-	console.log("drawImmediate() called by " + whofrom);
+// console.log("drawImmediate() called by " + whofrom);
 	// Don't bother drawing anything if there is no physical area to draw on
 	if(this.pendingRefresh !== undefined){
 		window.clearTimeout(this.pendingRefresh);
@@ -2416,7 +2424,7 @@ VirtualSky.prototype.drawImmediate = function(proj, whofrom){
 	var c = this.ctx;
 	var d = this.container;
 	
-	var xcenter = this.xoffset+this.wide/2;
+	var xcenter = this.aligner.xoffset+this.wide/2;
 	var ycenter = this.yoffset+this.tall/2;
 
 	c.moveTo(0,0);
@@ -2645,8 +2653,8 @@ VirtualSky.prototype.drawImmediate = function(proj, whofrom){
 	return this;
 };
 VirtualSky.prototype.startClip = function(){
-	var xcenter = this.xoffset+this.wide/2;
-	var ycenter = this.yoffset+this.tall/2;
+	var xcenter = this.aligner.xoffset+this.wide/2;
+	var ycenter = this.aligner.yoffset+this.tall/2;
 	
 	if(this.polartype){
 		this.ctx.save();
@@ -2755,8 +2763,8 @@ VirtualSky.prototype.drawStars = function(){
 				// i.e. smaller when closer to the horizon
 				if(atmos) d *= Math.exp(-(90-p.el)*0.01);
 				d *= f;
-				var x = this.xoffset+p.x;
-				var y = this.yoffset+p.y;
+				var x = this.aligner.xoffset+p.x;
+				var y = this.aligner.yoffset+p.y;
 				c.moveTo(x+d,y);
 				if(this.showstars) c.arc(x,y,d,0,Math.PI*2,true);
 				if(this.showstarlabels && this.starnames[this.stars[i][0]]){
@@ -2829,7 +2837,9 @@ VirtualSky.prototype.drawPlanets = function(){
 		if(this.planets[p].length == 3){
 			// Find nearest JD
 			if(this.planets[p][2].length%4 == 0){
-				if(this.jd > this.planets[p][2][0] && this.jd < this.planets[p][2][(this.planets[p][2].length-4)]){
+				var firstEntry = this.planets[p][2][0]; 
+				var lastEntry = this.planets[p][2][(this.planets[p][2].length-4)];
+				if(this.jd > firstEntry && this.jd < lastEntry){
 					var interp = this.interpolate(this.jd,this.planets[p][2]);
 					ra = interp.ra;
 					dec = interp.dec;
@@ -2855,7 +2865,7 @@ VirtualSky.prototype.drawPlanets = function(){
 				if(this.hasAtmos()) d *= Math.exp(-((90-pos.el)*this.d2r)*0.6);
 			}
 			if(d < 1.5) d = 1.5;
-			this.drawPlanet(this.xoffset+pos.x,this.yoffset+pos.y,d,colour,this.planets[p][0]);
+			this.drawPlanet(this.aligner.xoffset+pos.x,this.aligner.yoffset+pos.y,d,colour,this.planets[p][0]);
 		}
 
 		if(this.showorbits && mag < this.magnitude){
@@ -2870,7 +2880,7 @@ VirtualSky.prototype.drawPlanets = function(){
 					c.moveTo(previous.x,previous.y);
 					// Basic error checking: points behind us often have very long lines so we'll zap them
 					if(Math.abs(point.x-previous.x) < maxl){
-						c.lineTo(this.xoffset+point.x,this.yoffset+point.y);
+						c.lineTo(this.aligner.xoffset+point.x,this.aligner.yoffset+point.y);
 					}
 				}
 				previous = point;
@@ -2892,7 +2902,7 @@ VirtualSky.prototype.drawPlanets = function(){
 		if(this.sun) {
 			pos = this.ecliptic2xy(this.sun.lon*this.d2r,this.sun.lat*this.d2r,this.times.LST);
 			if(this.isVisible(pos.el) && !this.isPointBad(pos)){
-				this.drawPlanet(this.xoffset+pos.x,this.yoffset+pos.y,5,this.col.sun,"sun");
+				this.drawPlanet(this.aligner.xoffset+pos.x,this.aligner.yoffset+pos.y,5,this.col.sun,"sun");
 				this.lookup.sun = [this.ecliptic2radec(this.sun.lon*this.d2r,this.sun.lat*this.d2r,this.times.LST)];
 				this.lookup.sun[0].label = this.lang.sun;
 			}
@@ -2901,7 +2911,7 @@ VirtualSky.prototype.drawPlanets = function(){
 		if(this.moon) {
 			pos = this.ecliptic2xy(this.moon.lon*this.d2r,this.moon.lat*this.d2r,this.times.LST);
 			if(this.isVisible(pos.el) && !this.isPointBad(pos)){
-				this.drawPlanet(this.xoffset+pos.x,this.yoffset+pos.y,5,this.col.moon,"moon");
+				this.drawPlanet(this.aligner.xoffset+pos.x,this.aligner.yoffset+pos.y,5,this.col.moon,"moon");
 				this.lookup.moon = [this.ecliptic2radec(this.moon.lon*this.d2r,this.moon.lat*this.d2r,this.times.LST)];
 				this.lookup.moon[0].label = this.lang.moon;
 			}
@@ -2984,8 +2994,8 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 						if(!this.isPointBad(posa) && !this.isPointBad(posb)){
 							// Basic error checking: constellations behind us often have very long lines so we'll zap them
 							if(Math.abs(posa.x-posb.x) < maxl && Math.abs(posa.y-posb.y) < maxl){
-								x.moveTo(this.xoffset+posa.x,this.yoffset+posa.y);
-								x.lineTo(this.xoffset+posb.x,this.yoffset+posb.y);
+								x.moveTo(this.aligner.xoffset+posa.x,this.aligner.yoffset+posa.y);
+								x.lineTo(this.aligner.xoffset+posb.x,this.aligner.yoffset+posb.y);
 							}
 						}
 					}
@@ -2998,7 +3008,7 @@ VirtualSky.prototype.drawConstellationLines = function(colour){
 			if(this.isVisible(pos.el)){
 				var label = this.getPhrase('constellations',this.lines[c][0]);
 				var xoff = (x.measureText) ? -x.measureText(label).width/2 : 0;
-				x.fillText(label,this.xoffset+pos.x+xoff,this.yoffset+pos.y-fontsize/2);
+				x.fillText(label,this.aligner.xoffset+pos.x+xoff,this.aligner.yoffset+pos.y-fontsize/2);
 				x.fill();
 			}
 		}
@@ -3092,8 +3102,8 @@ VirtualSky.prototype.drawConstellationBoundaries = function(colour){
 					if(!this.isPointBad(posa) && !this.isPointBad(posb)){
 						// Basic error checking: constellations behind us often have very long lines so we'll zap them
 						if(Math.abs(posa.x-posb.x) < maxl && Math.abs(posa.y-posb.y) < maxl){
-							this.ctx.moveTo(this.xoffset+posa.x,this.yoffset+posa.y);
-							this.ctx.lineTo(this.xoffset+posb.x,this.yoffset+posb.y);
+							this.ctx.moveTo(this.aligner.xoffset+posa.x,this.aligner.yoffset+posa.y);
+							this.ctx.lineTo(this.aligner.xoffset+posb.x,this.aligner.yoffset+posb.y);
 						}
 					}
 				}
@@ -3141,9 +3151,9 @@ VirtualSky.prototype.drawGalaxy = function(colour){
 				if(!isNaN(dx) && !isNaN(dy)){
 					// Basic error checking: if the line is very long we need to normalize to other side of sky
 					if(dx >= maxl || dy >= maxl) this.ctx.moveTo(pb.x,pb.y);
-					this.ctx.lineTo(this.xoffset+pb.x,this.yoffset+pb.y);
+					this.ctx.lineTo(this.aligner.xoffset+pb.x,this.aligner.yoffset+pb.y);
 				}else{
-					this.ctx.moveTo(this.xoffset+pb.x,this.yoffset+pb.y);
+					this.ctx.moveTo(this.aligner.xoffset+pb.x,this.aligner.yoffset+pb.y);
 				}
 			}
 			pa = pb;
@@ -3183,9 +3193,9 @@ VirtualSky.prototype.drawMeteorShowers = function(colour){
 				if(this.isVisible(pos.el)){
 					label = this.htmlDecode(this.showers[s].name);
 					xoff = (c.measureText) ? -c.measureText(label).width/2 : 0;
-					c.moveTo(this.xoffset+pos.x+2,pos.y);
-					c.arc(this.xoffset+pos.x,pos.y,2,0,Math.PI*2,true);
-					c.fillText(label,this.xoffset+pos.x+xoff,this.yoffset+pos.y-fs/2);
+					c.moveTo(this.aligner.xoffset+pos.x+2,pos.y);
+					c.arc(this.aligner.xoffset+pos.x,pos.y,2,0,Math.PI*2,true);
+					c.fillText(label,this.aligner.xoffset+pos.x+xoff,this.aligner.yoffset+pos.y-fs/2);
 					this.lookup.meteorshower.push({'ra':(this.showers[s].pos[0][0]+(dra*f))*this.d2r,'dec':(this.showers[s].pos[0][1]+(ddc*f))*this.d2r,'label':label});
 				}
 			}
@@ -3366,8 +3376,8 @@ function joinpoint(s,type,a,b,old,maxl){
 	else if(type=="eq") pos = s.radec2xy(a,b);
 	else if(type=="ec") pos = s.ecliptic2xy(a,b,s.times.LST);
 	else if(type=="gal") pos = s.gal2xy(a,b);
-	x = this.xoffset+pos.x;
-	y = this.yoffset+pos.y;
+	x = s.aligner.xoffset+pos.x;
+	y = s.aligner.yoffset+pos.y;
 	if(type=="az") show = true;
 	else show = ((s.isVisible(pos.el)) ? true : false);
 	if(show && isFinite(x) && isFinite(y)){
@@ -3643,22 +3653,25 @@ VirtualSky.prototype.addPointer = function(input){
 	}
 	return (this.pointers.length);
 };
-VirtualSky.prototype.updateOrientation = function(theta, phi, scale_factor, xoffset, yoffset){
-	//if(typeof input.magnitude==="number") this.magnitude = input.magnitude;
-	if(typeof theta==="number") this.theta = theta;
-	if(typeof phi==="number") this.phi = phi;
-	if(typeof scale_factor==="number") this.scale_factor = scale_factor;
-	if(typeof xoffset==="number") this.xoffset = xoffset;
-	if(typeof yoffset==="number") this.yoffset = yoffset;
-	//if(typeof el==="number") this.elevation = el;
-	//if(typeof w==="number") this.wide = w;
-	//if(typeof h==="number") this.tall = h;
 
+VirtualSky.prototype.updateOrientation = function(aligner, file_datetime){
+	//if(typeof input.magnitude==="number") this.magnitude = input.magnitude;
+	if(typeof aligner.xorigin==="number") this.aligner.xorigin = aligner.xorigin;
+	if(typeof aligner.yorigin==="number") this.aligner.yorigin = aligner.yorigin;
+	if(typeof aligner.theta==="number") this.aligner.theta = aligner.theta;
+	if(typeof aligner.phi==="number") this.aligner.phi = aligner.phi;
+	if(typeof aligner.scale_factor==="number") this.aligner.scale_factor = aligner.scale_factor;
+	if(typeof aligner.xoffset==="number") this.aligner.xoffset = aligner.xoffset;
+	if(typeof aligner.yoffset==="number") this.aligner.yoffset = aligner.yoffset;
+
+	this.updateClock(file_datetime);
+		
+	//this.draw("updateProperties");
 	this.drawImmediate(this.projection, "updateProperties");
 	return this;
 };
 VirtualSky.prototype.getOrientation = function(){
-	return ([this.az_off, this.el, this.ra, this.dec]);
+	return ([this.aligner.theta, this.aligner.phi, this.aligner.scale_factor, this.aligner.xoffset, this.aligner.aligner.yoffset, this.filetime]);
 }
 
 VirtualSky.prototype.changeAzimuth = function(inc){
