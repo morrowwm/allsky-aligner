@@ -12,6 +12,12 @@ Very alpha. If you'd like to help:
 8) the map should rotate, pan and zoom now
 9) There are popup helps on the less intuitive buttons. The origin setting button doesn't do anything, yet.
 
+🞋 set the rotation origin. Current;y does not do anything
+↻ ↺ rotate
++ − scale
+🠜 🠞 🠝 🠟 translate
+🠜🠜 🠞🠞 change step size for adjustments by 20%
+
 I could use a quick browse through aligner.php by an experienced allsky developer for feedback on any real issues. So far it isn't really PHP code at all. I think it will have to have some PHP to write out the alignment parameters
 
 Next steps:
@@ -21,7 +27,7 @@ Next steps:
 * **Done**: get the constellation adjusting buttons working. This will take some changes to virtual sky, I think?
 * make the whole thing prettier
 * **Done for fisheye** get image and constellation scaling figured out ** Working for fisheye/polar **
-* present results in a form usable by allsky
+* present results in a form usable by allsky controller.js
 * pull request on changes needed in all-sky for use in html/allsky/virtualsky/virtualsky.js
 * * see https://github.com/AllskyTeam/allsky/discussions/3462#discussioncomment-8753359
   *  scaling, rotation, xoffset, yoffset
