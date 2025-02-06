@@ -15,7 +15,8 @@ Very alpha. If you'd like to help:
 9) There are popup helps on the less intuitive buttons. The origin setting button doesn't do anything, yet.
 
 ### Button Functions
-🞋 set the rotation origin. Current;y does not do anything  
+  
+🞋 set the rotation origin. Currently does not do anything  
 ↻ ↺ rotate  
 + − scale  
 ★ toggle visibility of stars and planets  
