@@ -18,7 +18,7 @@ Very alpha. If you'd like to help:
   
 🞋 set the rotation origin. Currently does not do anything  
 ↻ ↺ rotate  
-scale: + − 
+scale: + −  
 ★ toggle visibility of stars and planets  
 ♓ toggle visibility of constellations  
 🠜 🠞 🠝 🠟 translate  
