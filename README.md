@@ -2,14 +2,13 @@
 tool to align constellation overlay in https://github.com/AllskyTeam/allsky
 
 Very alpha. If you'd like to help:
-1) copy aligner.php into ~/allsky/html/allsky/ and virtualsky.js into ~/allsky/html/allsky/virtualsky/
-2) copy the test image into a location that your webserver will be able to access. Or use your own image
-3) navigate to http:/your-allsky-host/allsky/aligner.php
-4) in allsky, browse to a good image, right-click copy image address and paste into the Image textbox
-5) click on Load. This will cause a jquery event handler to fire, and:
-6) your image should appear
-
-7) open the developer console, click on the navigation buttons, you should see messages
+1) copy aligner.php into ~/allsky/html/allsky/
+2) save away a copy then overwrite ~/allsky/html/allsky/virtualsky/virtualsky.js with this version
+3) copy the test image into a location that your webserver will be able to access. Or better, use your own image.
+4) navigate to http:/your-allsky-host/allsky/aligner.php
+5) in a separate browser tab, go to your allsky, browse to a good image, right-click "Copy image address" and paste into the Image textbox of the Aligner in your first  tab
+6) click on Load. This will cause a jquery event handler to fire, and:
+7) your image should appear
 8) the map should rotate, pan and zoom now
 9) There are popup helps on the less intuitive buttons. The origin setting button doesn't do anything, yet.
 
